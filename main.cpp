@@ -26,12 +26,18 @@ struct TVertexCol {
 inline void putPixel(int x, int y, int R, int G, int B, QPainter *painter)
 {
     if (R < 0) R = 0;
+    if (R > 255) R = 255;
     if (G < 0) G = 0;
+    if (G > 255) G = 255;
     if (B < 0) B = 0;
+    if (B > 255) B = 255;
     QColor Color = QColor(R, G, B, 255);
     painter->setPen(Color);
     painter->drawPoint(x, y);
 }
+
+
+#define SUB_PIX(a) (ceil(a)-a)
 
 void drawTriangle(TVertexCol V1, TVertexCol V2, TVertexCol V3, QPainter *painter)
 {
@@ -87,7 +93,7 @@ void drawTriangle(TVertexCol V1, TVertexCol V2, TVertexCol V3, QPainter *painter
     int x;
     int x_end;
     float x_left = V1.x;
-    float x_right = x_left;
+    float x_right = V1.x;
     float y = V1.y;
     float cRp = V1.RGB[0];
     float cGp = V1.RGB[1];
@@ -121,6 +127,7 @@ void drawTriangle(TVertexCol V1, TVertexCol V2, TVertexCol V3, QPainter *painter
             }
         }
         else {
+            x_end = x_left;
             for (x=ceil(x_right); x<x_end; x++) {
                 cR += dRdX;
                 cG += dGdX;
@@ -179,7 +186,7 @@ int main(int argc, char *argv[])
     TVertexCol F = { 270, -10, {   0,   0, 255} };
 
     QTimer t;
-    int step = 105;
+    int step = 255;
     QObject::connect(&t, &QTimer::timeout, [&]() {
 
         TVertexCol APrim, BPrim, CPrim;
@@ -203,15 +210,15 @@ int main(int argc, char *argv[])
         FPrim.x = WND_WIDTH/2  + F.x * matrixRot[0] - F.y * matrixRot[1];
         FPrim.y = WND_HEIGHT/2 + F.x * matrixRot[1] + F.y * matrixRot[0];
 
-        APrim.RGB[0] = 128 + 127 * qSin(step * M_PI / 50.0 + 0);
+        APrim.RGB[0] = A.RGB[0]; //128 + 127 * qSin(step * M_PI / 50.0 + 0);
         APrim.RGB[1] = A.RGB[1];
         APrim.RGB[2] = A.RGB[2];
         BPrim.RGB[0] = B.RGB[0];
-        BPrim.RGB[1] = 128 + 127 * qSin(step * M_PI / 50.0 + (M_PI / 3));
+        BPrim.RGB[1] = B.RGB[1]; //128 + 127 * qSin(step * M_PI / 50.0 + (M_PI / 3));
         BPrim.RGB[2] = B.RGB[2];
         CPrim.RGB[0] = C.RGB[0];
         CPrim.RGB[1] = C.RGB[1];
-        CPrim.RGB[2] = 128 + 127 * qSin(step * M_PI / 50.0 + 2 * (M_PI / 3));
+        CPrim.RGB[2] = C.RGB[2]; //128 + 127 * qSin(step * M_PI / 50.0 + 2 * (M_PI / 3));
 
         DPrim.RGB[0] = 128 + 127 * qSin(step * M_PI / 50.0 + 0);
         DPrim.RGB[1] = D.RGB[1];
