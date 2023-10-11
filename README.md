@@ -1,6 +1,6 @@
 # Gouraud's software shading
 
-![ezcv logo](https://github.com/kmojsiewicz/RubicCube/blob/master/gouraud_shading.png)
+![ezcv logo](https://github.com/kmojsiewicz/GouraudShading/blob/main/gouraud_shading.png)
 
 Gouraud's software shading in drawing a triangle
 
