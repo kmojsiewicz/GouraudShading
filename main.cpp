@@ -90,16 +90,6 @@ void drawTriangle(TVertexCol V1, TVertexCol V2, TVertexCol V3, QPainter *painter
     float dBdY32 = (float)(V3.RGB[2] - V2.RGB[2]) * dY32;
     float dBdX   = (float)((V3.RGB[2] - V1.RGB[2])*ceil(V2.y - V1.y) + (V1.RGB[2] - V2.RGB[2])*ceil(V3.y - V1.y)) * dXCol;
 
-    int x;
-    int x_end;
-    float x_left = V1.x;
-    float x_right = V1.x;
-    float y = V1.y;
-    float cRp = V1.RGB[0];
-    float cGp = V1.RGB[1];
-    float cBp = V1.RGB[2];
-    float cR, cG, cB;
-
     if (dXdY21 > dXdY31) {
         swap_data(dXdY21, dXdY31);
         swap_data(dRdY21, dRdY31);
@@ -107,13 +97,19 @@ void drawTriangle(TVertexCol V1, TVertexCol V2, TVertexCol V3, QPainter *painter
         swap_data(dBdY21, dBdY31);
     }
 
+    int prestep = SUB_PIX(V1.y);
+    int x;
+    int x_end;
+    float x_left = V1.x + prestep * dXdY21;
+    float x_right = V1.x + prestep * dXdY31;
+    int y = ceil(V1.y);
+    float cRp = V1.RGB[0] + prestep * dRdY21;
+    float cGp = V1.RGB[1] + prestep * dGdY21;
+    float cBp = V1.RGB[2] + prestep * dBdY21;
+    float cR, cG, cB;
+
     while (y < V2.y) {
-        x_left  += dXdY21;
-        x_right += dXdY31;
-        x_end    = ceil(x_right);
-        cRp += dRdY21;
-        cGp += dGdY21;
-        cBp += dBdY21;
+        x_end = ceil(x_right);
         cR = ceil(cRp);
         cG = ceil(cGp);
         cB = ceil(cBp);
@@ -135,7 +131,12 @@ void drawTriangle(TVertexCol V1, TVertexCol V2, TVertexCol V3, QPainter *painter
                 putPixel(x, y, cR, cG, cB, painter);
             }
         }
-    y += 1.0;
+        x_left  += dXdY21;
+        x_right += dXdY31;
+        cRp += dRdY21;
+        cGp += dGdY21;
+        cBp += dBdY21;
+        y += 1.0;
     }
 
     dXdY31 = dXdY31tmp;
@@ -149,13 +150,19 @@ void drawTriangle(TVertexCol V1, TVertexCol V2, TVertexCol V3, QPainter *painter
         swap_data(dBdY31, dBdY32);
     }
 
+    prestep = SUB_PIX(V2.y);
+    if (V2.x > V1.x) {
+        x_right = V2.x + prestep * dXdY31;
+    }
+    else {
+        x_left = V2.x + SUB_PIX(V2.y) * dXdY32;
+        cRp = V2.RGB[0] + prestep * dRdY32;
+        cGp = V2.RGB[1] + prestep * dGdY32;
+        cBp = V2.RGB[2] + prestep * dBdY32;
+    }
+
     while (y < V3.y) {
-        x_left  += dXdY32;
-        x_right += dXdY31;
         x_end    = ceil(x_right);
-        cRp += dRdY32;
-        cGp += dGdY32;
-        cBp += dBdY32;
         cR = ceil(cRp);
         cG = ceil(cGp);
         cB = ceil(cBp);
@@ -166,7 +173,13 @@ void drawTriangle(TVertexCol V1, TVertexCol V2, TVertexCol V3, QPainter *painter
             cB += dBdX;
             putPixel(x, y, cR, cG, cB, painter);
         }
+        x_left  += dXdY32;
+        x_right += dXdY31;
+        cRp += dRdY32;
+        cGp += dGdY32;
+        cBp += dBdY32;
         y += 1.0;
+
     }
 }
 
@@ -186,7 +199,7 @@ int main(int argc, char *argv[])
     TVertexCol F = { 270, -10, {   0,   0, 255} };
 
     QTimer t;
-    int step = 255;
+    int step = 100;
     QObject::connect(&t, &QTimer::timeout, [&]() {
 
         TVertexCol APrim, BPrim, CPrim;
